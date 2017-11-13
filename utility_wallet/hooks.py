@@ -55,7 +55,7 @@ app_license = "MIT"
 # ------------
 
 # before_install = "utility_wallet.install.before_install"
-# after_install = "utility_wallet.install.after_install"
+after_install = "utility_wallet.install.after_install"
 
 # Desk Notifications
 # ------------------
@@ -119,4 +119,3 @@ app_license = "MIT"
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "utility_wallet.event.get_events"
 # }
-
