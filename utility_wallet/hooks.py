@@ -55,7 +55,9 @@ app_license = "MIT"
 # ------------
 
 # before_install = "utility_wallet.install.before_install"
-after_install = "utility_wallet.install.after_install"
+# after_install = "utility_wallet.install.after_install"
+
+setup_wizard_complete = "utility_wallet.setup.after_wizard_complete"
 
 # Desk Notifications
 # ------------------
