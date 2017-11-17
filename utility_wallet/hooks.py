@@ -10,6 +10,7 @@ app_icon = "fa fa-bolt"
 app_color = "blue"
 app_email = "info@libermatic.com"
 app_license = "MIT"
+fixtures = ["Custom Field"]
 
 # Includes in <head>
 # ------------------

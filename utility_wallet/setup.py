@@ -17,10 +17,10 @@ def _create_account(doc, company_name):
 			"account_type": doc['account_type'],
 		}).insert(ignore_if_duplicate=True)
 
-def after_wizard_complete():
+def after_wizard_complete(args=None):
 	if frappe.defaults.get_global_default('country') != "India":
 		return
-
+	
 	company_name = frappe.defaults.get_global_default('company')
 
 	_create_account({
