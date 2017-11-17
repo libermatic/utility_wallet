@@ -4,7 +4,6 @@
 frappe.ui.form.on('Utility Purchase', {
   onload: async function(frm) {
     if (frm.doc.__islocal) {
-      // frm.set_value('company', frappe.defaults.get_default('Company'));
       const { message } = await frappe.db.get_value(
         'Utility Wallet Settings',
         null,
@@ -31,14 +30,19 @@ frappe.ui.form.on('Utility Purchase', {
     frm.set_value('commission_rate', message['purchase_commission']);
   },
   amount: async function(frm) {
-    commission_amount = frm.doc['amount'] * frm.doc['commission_rate'] / 100;
-    frm.set_value('commission_amount', commission_amount);
-    frm.set_value('total', frm.doc['amount'] + commission_amount);
+    await frm.set_value(
+      'commission_amount',
+      frm.doc['amount'] * frm.doc['commission_rate'] / 100
+    );
+    frm.set_value('total', frm.doc['amount'] + frm.doc['commission_amount']);
   },
   commission_amount: async function(frm) {
-    frm.set_value(
-      'commission_rate',
-      frm.doc['commission_amount'] / frm.doc['amount'] * 100
-    );
+    if (frm.doc['amount']) {
+      await frm.set_value(
+        'commission_rate',
+        frm.doc['commission_amount'] / frm.doc['amount'] * 100
+      );
+      frm.set_value('total', frm.doc['amount'] + frm.doc['commission_amount']);
+    }
   },
 });

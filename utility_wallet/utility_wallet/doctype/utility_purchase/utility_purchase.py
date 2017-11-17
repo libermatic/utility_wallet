@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from erpnext import get_default_company
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController
@@ -21,7 +22,7 @@ class UtilityPurchase(AccountsController):
 		datetime = self.transaction_date.split()
 		self.posting_date = datetime[0]
 		self.posting_time = datetime[1]
-		self.company = frappe.defaults.get_user_default('company')
+		self.company = get_default_company()
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gl_entries = [
