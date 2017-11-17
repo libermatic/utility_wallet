@@ -116,4 +116,9 @@ frappe.ui.form.on('Utility Sale', {
       }
     }
   },
+  validate: async function(frm) {
+    if (!frm.doc.__islocal && !frm.doc['voucher_no']) {
+      frappe.throw('Cannot submit without Voucher No.');
+    }
+  },
 });
