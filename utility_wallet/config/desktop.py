@@ -6,7 +6,7 @@ def get_data():
 	return [
 		{
 			"module_name": "Utility Wallet",
-			"color": "blue",
+			"color": "#2196F3",
 			"icon": "fa fa-bolt",
 			"type": "module",
 			"label": _("Utility Wallet")
