@@ -33,7 +33,7 @@ class UtilitySale(AccountsController):
 					'account_currency': get_account_currency(self.wallet_account),
 					'credit_in_account_currency': self.amount + sale_expense_amount,
 					'credit': self.amount + sale_expense_amount,
-					'against': self.customer,
+					'against': self.wallet_provider,
 				}),
 			self.get_gl_dict({
 					'account': self.income_account,
