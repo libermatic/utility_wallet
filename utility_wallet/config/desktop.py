@@ -10,5 +10,5 @@ def get_data():
 			"icon": "fa fa-bolt",
 			"type": "module",
 			"label": _("Utility Wallet")
-		}
+		},
 	]
