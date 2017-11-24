@@ -38,7 +38,6 @@ class UtilityPurchase(AccountsController):
 					'account_currency': get_account_currency(self.commission_account),
 					'credit_in_account_currency': self.commission_amount,
 					'credit': self.commission_amount,
-					'against': self.supplier,
 					'cost_center': frappe.db.get_value('Company', self.company, 'cost_center')
 				}),
 			self.get_gl_dict({

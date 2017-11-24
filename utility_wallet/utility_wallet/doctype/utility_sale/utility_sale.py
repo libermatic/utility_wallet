@@ -40,7 +40,6 @@ class UtilitySale(AccountsController):
 					'account_currency': get_account_currency(self.income_account),
 					'credit_in_account_currency': self.charges,
 					'credit': self.charges,
-					'against': self.customer,
 					'cost_center': frappe.db.get_value('Company', self.company, 'cost_center'),
 				}),
 			self.get_gl_dict({
@@ -55,7 +54,6 @@ class UtilitySale(AccountsController):
 					'account_currency': get_account_currency(self.expense_account),
 					'debit_in_account_currency': sale_expense_amount,
 					'debit': sale_expense_amount,
-					'against': self.customer,
 					'cost_center': frappe.db.get_value('Company', self.company, 'cost_center'),
 				}),
 		]
