@@ -27,6 +27,12 @@ def get_data():
 					"name": "wallet-balance",
 					"label": _("Wallet Balance")
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Utility Sale Register",
+					"doctype": "Utility Sale Register",
+				},
 			]
 		},
 		{
