@@ -1,0 +1,26 @@
+  {% if data.length > 0 %}
+    <dl class="list-container">
+      {% for d in data %}
+      <div class="list-item">
+        <dt>
+          {{ d.wallet_provider }}
+        </dt>
+        <dd>
+          {{ format_currency(d.balance, currency, 2) }}
+        </dd>
+      </div>
+      {% endfor %}
+      <div class="list-item list-total">
+        <dt>
+          {{ __("Total") }}
+        </dt>
+        <dd>
+          {{ format_currency(total, currency, 2) }}
+        </dd>
+      </div>
+    </dl>
+  {% else %}
+    <div class="no-list-data">
+      {{ __("No wallet providers found") }}
+    </div>
+  {% endif %}

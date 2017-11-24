@@ -1,0 +1,23 @@
+#page-wallet-balance .list-container {
+  padding: 8px;
+}
+#page-wallet-balance .list-item dt,
+#page-wallet-balance .list-item dd {
+  font-size: 14px;
+  line-height: 1.5;
+}
+#page-wallet-balance .list-item dt {
+  min-width: 128px;
+  font-weight: normal;
+}
+#page-wallet-balance .list-item dd {
+  font-weight: bold;
+}
+#page-wallet-balance .list-total {
+  border-top: 1px solid #d1d8dd;
+}
+#page-wallet-balance .no-list-data {
+  padding: 16px;
+  text-align: center;
+  color: #8d99a6;
+}
