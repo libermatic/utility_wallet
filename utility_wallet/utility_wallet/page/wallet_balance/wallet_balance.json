@@ -1,0 +1,23 @@
+{
+ "content": null, 
+ "creation": "2017-11-24 00:57:55.740688", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "idx": 0, 
+ "modified": "2017-11-24 00:58:07.338978", 
+ "modified_by": "Administrator", 
+ "module": "Utility Wallet", 
+ "name": "wallet-balance", 
+ "owner": "Administrator", 
+ "page_name": "wallet-balance", 
+ "roles": [
+  {
+   "role": "Accounts User"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "system_page": 0, 
+ "title": "Wallet Balance"
+}
