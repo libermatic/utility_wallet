@@ -1,0 +1,7 @@
+{
+  "css/utility_wallet_pages.css": ["public/css/wallet_balance.css"],
+  "js/utility_wallet.min.js": [
+    "public/js/wallet_balance.html",
+    "public/js/wallet_balance.js"
+  ]
+}

@@ -16,7 +16,7 @@ fixtures = ["Custom Field"]
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/utility_wallet/css/utility_wallet.css"
+app_include_css = "assets/css/utility_wallet_pages.css"
 # app_include_js = "/assets/utility_wallet/js/utility_wallet.js"
 
 # include js, css files in header of web template
