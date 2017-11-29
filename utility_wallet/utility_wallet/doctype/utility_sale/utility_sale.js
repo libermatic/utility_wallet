@@ -13,6 +13,20 @@ async function set_unique_no(frm) {
   frm.set_value('unique_no', message['unique_no']);
 }
 
+async function get_rounding_adjustment(amt) {
+  const { message } = await frappe.db.get_value(
+    'Utility Wallet Settings',
+    null,
+    'round_to'
+  );
+  const round_to = parseInt(message['round_to'], 10);
+  if (round_to) {
+    const new_amt = Math.ceil(amt / round_to) * round_to;
+    return new_amt - amt;
+  }
+  return 0;
+}
+
 frappe.ui.form.on('Utility Sale', {
   onload: async function(frm) {
     if (frm.doc.__islocal) {
@@ -99,36 +113,27 @@ frappe.ui.form.on('Utility Sale', {
       },
       'sale_rate'
     );
-    await frm.set_value('service_rate', message['sale_rate']);
-    await frm.set_value(
-      'charges',
-      frm.doc['amount'] * frm.doc['service_rate'] / 100
-    );
-    frm.set_value('total', frm.doc['amount'] + frm.doc['charges']);
+    const { amount } = frm.doc;
+    const charges = amount * frm.doc['service_rate'] / 100;
+    frm.set_value('charges', charges);
   },
   charges: async function(frm) {
-    if (frm.doc['amount']) {
-      await frm.set_value(
-        'service_rate',
-        frm.doc['charges'] / frm.doc['amount'] * 100
-      );
-      frm.set_value('total', frm.doc['amount'] + frm.doc['charges']);
-    }
+    const { amount, charges } = frm.doc;
+    const total = amount + charges;
+    frm.set_value('total', total);
   },
   total: async function(frm) {
-    const { message } = await frappe.db.get_value(
-      'Utility Wallet Settings',
-      null,
-      'round_to'
-    );
-    const round_to = parseInt(message['round_to'], 10);
-    if (round_to) {
-      const old_total = frm.doc['total'];
-      const new_total = Math.ceil(old_total / round_to) * round_to;
-      if (old_total !== new_total) {
-        frm.set_value('charges', new_total - frm.doc['amount']);
-      }
+    const { total, amount, disable_rounding } = frm.doc;
+    if (disable_rounding) {
+      frm.set_value('charges', total - amount);
+    } else {
+      const rounding_adjustment = await get_rounding_adjustment(total);
+      frm.set_value('charges', total + rounding_adjustment - amount);
     }
+  },
+  disable_rounding: async function(frm) {
+    frm.set_value('amount', null);
+    frm.set_value('charges', null);
   },
   validate: async function(frm) {
     if (!frm.doc.__islocal && !frm.doc['voucher_no']) {
