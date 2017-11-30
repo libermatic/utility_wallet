@@ -10,7 +10,26 @@ app_icon = "fa fa-bolt"
 app_color = "blue"
 app_email = "info@libermatic.com"
 app_license = "MIT"
-fixtures = ["Custom Field"]
+fixtures = [{
+        'doctype': 'Custom Field',
+        'filters': [
+                [ 'dt', 'in', ('Customer', 'Supplier')],
+                [
+                    'fieldname',
+                    'in',
+                    (
+                        'utility_information',
+                        'utility_service',
+                        'utility_wallet',
+                        'has_wallet',
+                        'purchase_commission',
+                        'credit_amount'
+                    )]
+            ]
+    }, {
+        'doctype': 'Custom Script',
+        'filters': { 'dt': 'Customer' }
+    }]
 
 # Includes in <head>
 # ------------------
