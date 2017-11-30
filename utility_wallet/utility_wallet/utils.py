@@ -27,6 +27,8 @@ def get_all_wallet_balances():
     data = []
     wallets = frappe.get_list("Supplier", fields=["name"], filters = { 'has_wallet': True })
     for w in wallets:
-        data.append({ 'wallet_provider': w.name, 'balance': get_wallet_balance(w.name) })
+        actual_balance = get_wallet_balance(w.name)
+        credit_amount = frappe.db.get_value('Supplier', w.name, 'credit_amount')
+        data.append({ 'wallet_provider': w.name, 'actual_balance': actual_balance, 'virtual_balance': credit_amount + actual_balance })
 
     return data

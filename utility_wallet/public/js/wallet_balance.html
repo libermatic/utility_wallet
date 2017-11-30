@@ -1,24 +1,41 @@
   {% if data.length > 0 %}
-    <dl class="list-container">
-      {% for d in data %}
-      <div class="list-item">
-        <dt>
-          {{ d.wallet_provider }}
-        </dt>
-        <dd>
-          {{ format_currency(d.balance, currency, 2) }}
-        </dd>
-      </div>
-      {% endfor %}
-      <div class="list-item list-total">
-        <dt>
-          {{ __("Total") }}
-        </dt>
-        <dd>
-          {{ format_currency(total, currency, 2) }}
-        </dd>
-      </div>
-    </dl>
+    <table class="table table-striped table-hover">
+      <thead>
+        <tr>
+          <th scope="col">{{ __("Wallet Provider") }}</th>
+          <th scope="col" class="number">{{ __("Actual Balance") }}</th>
+          <th scope="col" class="number">{{ __("Virtual Balance") }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in data %}
+        <tr>
+          <td>
+            {{ d.wallet_provider }}
+          </td>
+          <td class="number">
+            {{ format_currency(d.actual_balance, currency, 2) }}
+          </td>
+          <td class="number">
+            {{ format_currency(d.virtual_balance, currency, 2) }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>
+            {{ __("Total") }}
+          </td>
+          <td class="number">
+            {{ format_currency(total_actual_balance, currency, 2) }}
+          </td>
+          <td class="number">
+            {{ format_currency(total_virtual_balance, currency, 2) }}
+          </td>
+        </tr>
+      </tfoot>
+    </table>
   {% else %}
     <div class="no-list-data">
       {{ __("No wallet providers found") }}

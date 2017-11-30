@@ -7,9 +7,6 @@ utility_wallet.WalletBalance = Class.extend({
   },
   make: function() {},
   refresh: function() {
-    if (this.before_refresh) {
-      this.before_refresh();
-    }
     frappe
       .call({
         method: 'utility_wallet.utility_wallet.utils.get_all_wallet_balances',
@@ -19,10 +16,19 @@ utility_wallet.WalletBalance = Class.extend({
       });
   },
   render: function(data = []) {
-    const total = data.reduce((a, d) => a + d.balance, 0);
+    const total_actual_balance = data.reduce((a, d) => a + d.actual_balance, 0);
+    const total_virtual_balance = data.reduce(
+      (a, d) => a + d.virtual_balance,
+      0
+    );
     const currency = frappe.defaults.get_default('currency');
     $(
-      frappe.render_template('wallet_balance', { data, currency, total })
+      frappe.render_template('wallet_balance', {
+        data,
+        currency,
+        total_actual_balance,
+        total_virtual_balance,
+      })
     ).appendTo(this.parent);
   },
 });
