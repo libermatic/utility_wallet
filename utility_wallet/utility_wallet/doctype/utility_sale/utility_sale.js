@@ -2,9 +2,10 @@
 // For license information, please see license.txt
 
 async function set_unique_no(frm) {
-  const { message } = await frappe.db.get_value(
+  const { message = {} } = await frappe.db.get_value(
     'Customer Utility Item',
     {
+      utility_item: frm.doc['utility_item'],
       parent: frm.doc['customer'],
       parenttype: 'Customer',
     },
