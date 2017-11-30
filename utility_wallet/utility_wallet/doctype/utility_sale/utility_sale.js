@@ -92,18 +92,14 @@ frappe.ui.form.on('Utility Sale', {
     frm.set_value('charges', null);
   },
   wallet_provider: async function(frm) {
-    const { message } = await frappe.call({
+    const { message = {} } = await frappe.call({
       method: 'utility_wallet.utility_wallet.utils.get_wallet_balance',
       args: {
         wallet_account: frm.doc.wallet_account,
         wallet_provider: frm.doc.wallet_provider,
       },
     });
-    if (message) {
-      frm.set_value('balance', message);
-    } else {
-      frm.set_value('balance', 0);
-    }
+    frm.set_value('balance', message['virtual']);
   },
   amount: async function(frm) {
     const { message } = await frappe.db.get_value(
