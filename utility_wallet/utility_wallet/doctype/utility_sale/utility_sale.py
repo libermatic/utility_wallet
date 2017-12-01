@@ -7,6 +7,7 @@ from datetime import datetime
 import frappe
 from frappe.model.document import Document
 from erpnext import get_default_company
+from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController
@@ -14,11 +15,11 @@ from erpnext.controllers.accounts_controller import AccountsController
 class UtilitySale(AccountsController):
 	def on_submit(self):
 		self.set_missing_values()
-		self.make_gl_entries()
+		self.make_parent_gl_entries()
 
 	def on_cancel(self):
 		self.set_missing_values()
-		self.make_gl_entries(cancel=1)
+		self.make_parent_gl_entries(cancel=1)
 
 	def set_missing_values(self, for_validate=False):
 		if isinstance(self.transaction_date, datetime):
@@ -30,8 +31,9 @@ class UtilitySale(AccountsController):
 			self.posting_time = date_time[1]
 		self.company = get_default_company()
 
-	def make_gl_entries(self, cancel=0, adv_adj=0):
+	def make_parent_gl_entries(self, cancel=0, adv_adj=0):
 		sale_expense_amount = self.amount * self.sale_expense_rate / 100
+		party_account = get_party_account('Customer', self.customer, self.company)
 		gl_entries = [
 			self.get_gl_dict({
 					'account': self.wallet_account,
@@ -46,13 +48,15 @@ class UtilitySale(AccountsController):
 					'credit_in_account_currency': self.charges,
 					'credit': self.charges,
 					'cost_center': frappe.db.get_value('Company', self.company, 'cost_center'),
+					'against': self.customer,
 				}),
 			self.get_gl_dict({
-					'account': self.debit_to,
-					'account_currency': get_account_currency(self.debit_to),
+					'account': party_account,
+					'account_currency': get_account_currency(party_account),
 					'debit_in_account_currency': self.total,
 					'debit': self.total,
-					'against': self.customer,
+					'party_type': 'Customer',
+					'party': self.customer,
 				}),
 			self.get_gl_dict({
 					'account': self.expense_account,
@@ -60,6 +64,23 @@ class UtilitySale(AccountsController):
 					'debit_in_account_currency': sale_expense_amount,
 					'debit': sale_expense_amount,
 					'cost_center': frappe.db.get_value('Company', self.company, 'cost_center'),
+					'against': self.wallet_provider,
 				}),
 		]
+		if self.is_paid:
+			gl_entries.append(self.get_gl_dict({
+					'account': party_account,
+					'account_currency': get_account_currency(party_account),
+					'credit_in_account_currency': self.total,
+					'credit': self.total,
+					'party_type': 'Customer',
+					'party': self.customer,
+				}))
+			gl_entries.append(self.get_gl_dict({
+					'account': self.debit_to,
+					'account_currency': get_account_currency(self.debit_to),
+					'debit_in_account_currency': self.total,
+					'debit': self.total,
+					'against': self.customer,
+				}))
 		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
