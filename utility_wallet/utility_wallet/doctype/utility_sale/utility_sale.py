@@ -3,6 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+from datetime import datetime
 import frappe
 from frappe.model.document import Document
 from erpnext import get_default_company
@@ -20,9 +21,13 @@ class UtilitySale(AccountsController):
 		self.make_gl_entries(cancel=1)
 
 	def set_missing_values(self, for_validate=False):
-		datetime = self.transaction_date.split()
-		self.posting_date = datetime[0]
-		self.posting_time = datetime[1]
+		if isinstance(self.transaction_date, datetime):
+			self.posting_date = self.transaction_date.strftime('%Y-%m-%d')
+			self.posting_time = self.transaction_date.strftime('%H:%M:%S.%f')
+		else:
+			date_time = self.transaction_date.split()
+			self.posting_date = date_time[0]
+			self.posting_time = date_time[1]
 		self.company = get_default_company()
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
