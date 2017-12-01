@@ -113,6 +113,7 @@ frappe.ui.form.on('Utility Sale', {
     const { amount } = frm.doc;
     const charges = amount * frm.doc['service_rate'] / 100;
     frm.set_value('charges', charges);
+    frm.set_value('total', amount + charges);
   },
   charges: async function(frm) {
     const { amount, charges } = frm.doc;
