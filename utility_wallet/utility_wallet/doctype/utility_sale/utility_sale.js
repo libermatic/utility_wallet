@@ -29,6 +29,109 @@ async function get_rounding_adjustment(amt) {
 }
 
 frappe.ui.form.on('Utility Sale', {
+  refresh: async function(frm) {
+    if (
+      frm.doc['docstatus'] === 1 &&
+      0 < frm.doc['paid_amount'] &&
+      frm.doc['paid_amount'] < frm.doc['total']
+    ) {
+      const remove_dialog = new frappe.ui.Dialog({
+        title: 'Delete Payment',
+        fields: [{ fieldname: 'ht', fieldtype: 'HTML' }],
+      });
+      const container = $('<table />').addClass(
+        'table table-condensed table-striped'
+      );
+      container.append(
+        $('<tr />')
+          .append($('<th scope="col" />').text('Date'))
+          .append($('<th scope="col" class="text-right" />').text('Amount'))
+          .append($('<th scope="col" class="text-center" />').text('Action'))
+      );
+      remove_dialog.fields_dict.ht.$wrapper.append(container);
+      frm.doc['payments'].forEach(function({
+        payment_id,
+        payment_date,
+        payment_amount,
+      }) {
+        const handle_click = async function() {
+          const { message = {} } = await frappe.call({
+            method:
+              'utility_wallet.utility_wallet.doctype.utility_sale.utility_sale.make_payment',
+            args: {
+              name: frm.doc['name'],
+              payment_id,
+              payment_date,
+              payment_amount,
+              reverse: 1,
+            },
+          });
+          remove_dialog.hide();
+          frm.reload_doc();
+        };
+        container.append(
+          $('<tr />')
+            .append($('<td />').text(payment_date))
+            .append(
+              $('<td class="text-right" />').text(
+                format_currency(
+                  payment_amount,
+                  frappe.defaults.get_default('currency'),
+                  2
+                )
+              )
+            )
+            .append(
+              $('<td class="text-center" />').append(
+                $('<i class="fa fa-times" style="cursor: pointer;" />').click(
+                  handle_click
+                )
+              )
+            )
+        );
+      });
+      frm.add_custom_button(__('Delete Payment'), async function(fields) {
+        remove_dialog.show();
+      });
+    }
+    if (frm.doc['docstatus'] === 1 && !frm.doc['is_paid']) {
+      const pay_dialog = new frappe.ui.Dialog({
+        title: 'Make Payment',
+        fields: [
+          {
+            label: 'Date',
+            fieldname: 'payment_date',
+            fieldtype: 'Datetime',
+            default: frappe.datetime.now_datetime(),
+          },
+          {
+            label: 'Amount',
+            fieldname: 'payment_amount',
+            fieldtype: 'Currency',
+          },
+        ],
+      });
+      pay_dialog.set_primary_action(__('Pay'), async function(fields) {
+        const { message = {} } = await frappe.call({
+          method:
+            'utility_wallet.utility_wallet.doctype.utility_sale.utility_sale.make_payment',
+          args: Object.assign(
+            { name: frm.doc['name'], payment_id: frappe.utils.get_random(10) },
+            fields
+          ),
+        });
+        this.hide();
+        frm.reload_doc();
+      });
+      const pay_button = frm.add_custom_button(
+        __('Receive Payment'),
+        function() {
+          pay_dialog.show();
+        }
+      );
+      pay_button.addClass('btn-primary');
+    }
+  },
   onload: async function(frm) {
     if (frm.doc.__islocal) {
       const { message } = await frappe.db.get_value(
@@ -54,6 +157,10 @@ frappe.ui.form.on('Utility Sale', {
         frm.set_value('expense_account', sale_charges_account);
       }
     }
+    if (frm.doc['docstatus'] === 1) {
+      frm.set_df_property('is_paid', 'read_only', 1);
+    }
+    frm.set_df_property('payments', 'read_only', 1);
   },
   customer: async function(frm) {
     if (frm.doc['utility_item']) {
@@ -120,6 +227,13 @@ frappe.ui.form.on('Utility Sale', {
     const total = amount + charges;
     frm.set_value('total', total);
   },
+  is_paid: async function(frm) {
+    if (frm.doc['is_paid']) {
+      frm.set_value('paid_amount', frm.doc['total']);
+    } else {
+      frm.set_value('paid_amount', 0);
+    }
+  },
   total: async function(frm) {
     const { total, amount, disable_rounding } = frm.doc;
     if (disable_rounding) {
@@ -127,6 +241,9 @@ frappe.ui.form.on('Utility Sale', {
     } else {
       const rounding_adjustment = await get_rounding_adjustment(total);
       frm.set_value('charges', total + rounding_adjustment - amount);
+    }
+    if (frm.doc['is_paid']) {
+      frm.set_value('paid_amount', total);
     }
   },
   disable_rounding: async function(frm) {
