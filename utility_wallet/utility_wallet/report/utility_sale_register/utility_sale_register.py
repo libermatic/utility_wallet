@@ -16,21 +16,27 @@ def execute(filters=None):
 			_("Amount") + ":Currency/currency:90",
 			_("Charges") + ":Currency/currency:90",
 			_("Total") + ":Currency/currency:90",
+			_("Outstanding") + ":Currency/currency:90",
+			_("Unique No") + "::90",
 			_("Voucher Code") + "::180",
+			_("Phone") + "::90",
 		]
-	cond = ["docstatus = 1"]
+	cond = ["ut.docstatus = 1"]
 	if filters:
 		if filters.get('from_date'):
-			cond.append("transaction_date >= '%s'" % filters.get('from_date'))
+			cond.append("ut.transaction_date >= '%s'" % filters.get('from_date'))
 		if filters.get('to_date'):
-			cond.append("transaction_date < '%s'" % add_days(filters.get('to_date'), 1))
+			cond.append("ut.transaction_date < '%s'" % add_days(filters.get('to_date'), 1))
 		if filters.get('utility_item'):
-			cond.append("utility_item = '%s'" % filters.get('utility_item'))
+			cond.append("ut.utility_item = '%s'" % filters.get('utility_item'))
 		if filters.get('wallet_provider'):
-			cond.append("wallet_provider = '%s'" % filters.get('wallet_provider'))
+			cond.append("ut.wallet_provider = '%s'" % filters.get('wallet_provider'))
 	data = frappe.db.sql("""
-		SELECT transaction_date, name, customer, utility_item, wallet_provider, amount, charges, total, voucher_no
-		FROM `tabUtility Sale`
+		SELECT ut.transaction_date, ut.name, ut.customer, ut.utility_item, ut.wallet_provider, ut.amount, ut.charges, ut.total, ut.total-ut.paid_amount, ut.unique_no, ut.voucher_no, at.phone
+		FROM `tabUtility Sale` AS ut
+		LEFT JOIN `tabDynamic Link` AS dt ON dt.link_name = ut.customer
+		LEFT JOIN `tabAddress` AS at ON dt.parent = at.name
 		WHERE {}
+		ORDER BY ut.transaction_date
 	""".format(" and ".join(cond)))
 	return column, data
