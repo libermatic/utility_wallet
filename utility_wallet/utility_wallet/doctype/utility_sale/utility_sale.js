@@ -108,11 +108,12 @@ frappe.ui.form.on('Utility Sale', {
             label: 'Amount',
             fieldname: 'payment_amount',
             fieldtype: 'Currency',
+            default: frm.doc['total'] - frm.doc['paid_amount'],
           },
         ],
       });
       pay_dialog.set_primary_action(__('Pay'), async function(fields) {
-        const { message = {} } = await frappe.call({
+        await frappe.call({
           method:
             'utility_wallet.utility_wallet.doctype.utility_sale.utility_sale.make_payment',
           args: Object.assign(

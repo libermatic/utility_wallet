@@ -37,12 +37,12 @@ class UtilitySale(AccountsController):
 	def on_cancel(self):
 		self.set_missing_values()
 		for entry in self.payments:
-			make_payment(
-			self.name,
-			payment_id=entry.payment_id,
-			payment_date=entry.payment_date,
-			payment_amount=entry.payment_amount,
-			parent_cancel=1
+				make_payment(
+				self.name,
+				payment_id=entry.payment_id,
+				payment_date=entry.payment_date,
+				payment_amount=entry.payment_amount,
+				parent_cancel=1
 			)
 		self.make_parent_gl_entries(cancel=1)
 
