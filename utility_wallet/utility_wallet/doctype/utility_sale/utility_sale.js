@@ -190,10 +190,22 @@ frappe.ui.form.on('Utility Sale', {
     );
     frm.set_value('wallet_provider', message['wallet_provider']);
     frm.set_value('service_rate', message['sale_rate']);
-    frm.set_value('sale_expense_rate', message['sale_expense']);
+    await frm.set_value('sale_expense_rate', message['sale_expense']);
 
     if (frm.doc['customer']) {
       set_unique_no(frm);
+      const { message } = await frappe.db.get_value(
+        'Customer Utility Item',
+        {
+          utility_item: frm.doc['utility_item'],
+          parent: frm.doc['customer'],
+          parenttype: 'Customer',
+        },
+        'no_sale_charges'
+      );
+      if (message['no_sale_charges']) {
+        frm.set_value('sale_expense_rate', 0);
+      }
     }
     frm.set_value('amount', null);
     frm.set_value('charges', null);
@@ -212,6 +224,7 @@ frappe.ui.form.on('Utility Sale', {
     const { message } = await frappe.db.get_value(
       'Utility Item Supplier',
       {
+        wallet_provider: frm.doc['wallet_provider'],
         parent: frm.doc['utility_item'],
         parenttype: 'Utility Item',
       },
