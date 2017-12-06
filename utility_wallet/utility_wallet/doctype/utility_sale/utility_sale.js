@@ -30,6 +30,9 @@ async function get_rounding_adjustment(amt) {
 
 frappe.ui.form.on('Utility Sale', {
   refresh: async function(frm) {
+    if (frm.doc['docstatus'] === 1) {
+      frm.set_df_property('is_paid', 'read_only', 1);
+    }
     if (
       frm.doc['docstatus'] === 1 &&
       0 < frm.doc['paid_amount'] &&
@@ -157,9 +160,6 @@ frappe.ui.form.on('Utility Sale', {
         frm.set_value('debit_to', debit_to);
         frm.set_value('expense_account', sale_charges_account);
       }
-    }
-    if (frm.doc['docstatus'] === 1) {
-      frm.set_df_property('is_paid', 'read_only', 1);
     }
     frm.set_df_property('payments', 'read_only', 1);
   },
