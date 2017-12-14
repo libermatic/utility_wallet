@@ -14,6 +14,7 @@ def execute(filters=None):
 			_("Utility Item") + ":Link/Utility Item:120",
 			_("Wallet Provider") + ":Link/Supplier:120",
 			_("Amount") + ":Currency/currency:90",
+			_("Expense") + ":Currency/currency:90",
 			_("Charges") + ":Currency/currency:90",
 			_("Total") + ":Currency/currency:90",
 			_("Outstanding") + ":Currency/currency:90",
@@ -32,7 +33,20 @@ def execute(filters=None):
 		if filters.get('wallet_provider'):
 			cond.append("ut.wallet_provider = '%s'" % filters.get('wallet_provider'))
 	data = frappe.db.sql("""
-		SELECT ut.transaction_date, ut.name, ut.customer, ut.utility_item, ut.wallet_provider, ut.amount, ut.charges, ut.total, ut.total-ut.paid_amount, ut.unique_no, ut.voucher_no, at.phone
+		SELECT
+			ut.transaction_date,
+			ut.name,
+			ut.customer,
+			ut.utility_item,
+			ut.wallet_provider,
+			ut.amount,
+			ut.sale_expense_rate * ut.amount / 100 AS sale_expense_amount,
+			ut.charges - (SELECT sale_expense_amount),
+			ut.total,
+			ut.total-ut.paid_amount,
+			ut.unique_no,
+			ut.voucher_no,
+			at.phone
 		FROM `tabUtility Sale` AS ut
 		LEFT JOIN `tabDynamic Link` AS dt ON dt.link_name = ut.customer
 		LEFT JOIN `tabAddress` AS at ON dt.parent = at.name
