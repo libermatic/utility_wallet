@@ -1,17 +1,24 @@
 // Copyright (c) 2017, Libermatic and contributors
 // For license information, please see license.txt
 
+const promisify = api => (...args) =>
+  new Promise(resolve => {
+    api(...args, (...results) => resolve(...results));
+  });
+
 async function set_unique_no(frm) {
-  const { message = {} } = await frappe.db.get_value(
-    'Customer Utility Item',
-    {
-      utility_item: frm.doc['utility_item'],
-      parent: frm.doc['customer'],
-      parenttype: 'Customer',
-    },
-    'unique_no'
+  await promisify(frappe.model.with_doc)('Customer', frm.doc['customer']);
+  const { utility_service } =
+    frappe.model.get_doc('Customer', frm.doc['customer']) || {};
+  if (utility_service.length > 0) {
+    frm.set_value('utility_item', utility_service[0]['utility_item']);
+  }
+  const service = utility_service.find(
+    ({ utility_item }) => utility_item === frm.doc['utility_item']
   );
-  frm.set_value('unique_no', message['unique_no']);
+  if (service) {
+    frm.set_value('unique_no', service['unique_no']);
+  }
 }
 
 async function get_rounding_adjustment(amt) {
@@ -167,44 +174,35 @@ frappe.ui.form.on('Utility Sale', {
     if (frm.doc['utility_item']) {
       set_unique_no(frm);
     } else {
-      const { message } = await frappe.db.get_value(
-        'Customer Utility Item',
-        {
-          parent: frm.doc['customer'],
-          parenttype: 'Customer',
-        },
-        'utility_item'
-      );
-      if (message['utility_item']) {
-        frm.set_value('utility_item', message['utility_item']);
+      await promisify(frappe.model.with_doc)('Customer', frm.doc['customer']);
+      const { utility_service } =
+        frappe.model.get_doc('Customer', frm.doc['customer']) || {};
+      if (utility_service.length > 0) {
+        frm.set_value('utility_item', utility_service[0]['utility_item']);
       }
     }
   },
   utility_item: async function(frm) {
-    const { message } = await frappe.db.get_value(
-      'Utility Item Supplier',
-      {
-        parent: frm.doc['utility_item'],
-        parenttype: 'Utility Item',
-      },
-      ['wallet_provider', 'sale_rate', 'sale_expense']
+    await promisify(frappe.model.with_doc)(
+      'Utility Item',
+      frm.doc['utility_item']
     );
-    frm.set_value('wallet_provider', message['wallet_provider']);
-    frm.set_value('service_rate', message['sale_rate']);
-    await frm.set_value('sale_expense_rate', message['sale_expense']);
-
+    const { suppliers } =
+      frappe.model.get_doc('Utility Item', frm.doc['utility_item']) || {};
+    if (suppliers.length > 0) {
+      frm.set_value('wallet_provider', suppliers[0]['wallet_provider']);
+      frm.set_value('service_rate', suppliers[0]['sale_rate']);
+      await frm.set_value('sale_expense_rate', suppliers[0]['sale_expense']);
+    }
     if (frm.doc['customer']) {
       set_unique_no(frm);
-      const { message } = await frappe.db.get_value(
-        'Customer Utility Item',
-        {
-          utility_item: frm.doc['utility_item'],
-          parent: frm.doc['customer'],
-          parenttype: 'Customer',
-        },
-        'no_sale_charges'
+      await promisify(frappe.model.with_doc)('Customer', frm.doc['customer']);
+      const { utility_service } =
+        frappe.model.get_doc('Customer', frm.doc['customer']) || {};
+      const service = utility_service.find(
+        ({ utility_item }) => utility_item === frm.doc['utility_item']
       );
-      if (message['no_sale_charges']) {
+      if (service && service['no_sale_charges']) {
         frm.set_value('sale_expense_rate', 0);
       }
     }
@@ -222,15 +220,6 @@ frappe.ui.form.on('Utility Sale', {
     frm.set_value('balance', message['virtual']);
   },
   amount: async function(frm) {
-    const { message } = await frappe.db.get_value(
-      'Utility Item Supplier',
-      {
-        wallet_provider: frm.doc['wallet_provider'],
-        parent: frm.doc['utility_item'],
-        parenttype: 'Utility Item',
-      },
-      'sale_rate'
-    );
     const { amount } = frm.doc;
     const charges = amount * frm.doc['service_rate'] / 100;
     frm.set_value('charges', charges);
